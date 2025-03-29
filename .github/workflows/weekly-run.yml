@@ -1,0 +1,25 @@
+name: Weekly Sunday Run
+
+on:
+  schedule:
+    - cron: "0 10 * * 0" # Runs every Sunday at 10:00 AM GMT
+  workflow_dispatch: # Allows manual trigger if needed
+
+jobs:
+  run-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18 # Change to your Node.js version if needed
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run the application
+        run: node index.js # Modify this if your entry file is different
