@@ -15,10 +15,14 @@ async function main() {
     // Run the scraper
     // const data = await scrapeWebsite("https://example.com");
     const data = await fetchBins();
-    sendAnnouncementToDiscord(data);
+    const notification = data
+      .map((d) => `${d.label}: ${d.formatted}`)
+      .join("\n");
+    const fin = await sendAnnouncementToDiscord(notification);
     // Log the data to console
     console.log("Scraping completed. Data:");
-    console.log(JSON.stringify(data, null, 2));
+    console.log(notification);
+    process.exit(0);
   } catch (error) {
     console.error("Error in scraping process:", error);
     process.exit(1);
@@ -70,6 +74,47 @@ async function fetchBins() {
       "getRoundCalendarForUPRNResult"
     ];
   const parsed = result.split("<img")[0].split("<br>");
-  console.log(result);
-  return text;
+  const mappedResult = parsed.map(extractBinInfo).filter(Boolean);
+
+  // Sort by nearest date
+  mappedResult.sort((a, b) => a.date - b.date);
+
+  return mappedResult;
 }
+
+import { parse, format, differenceInCalendarDays } from "date-fns";
+
+const formatRelativeDate = (dateString) => {
+  const parsedDate = parse(dateString, "EEE d MMM", new Date());
+  const daysDiff = differenceInCalendarDays(parsedDate, new Date());
+
+  let relativeText =
+    daysDiff === 0
+      ? "today"
+      : daysDiff === 1
+      ? "tomorrow"
+      : daysDiff > 1
+      ? `${daysDiff} days from now`
+      : `${Math.abs(daysDiff)} days ago`;
+
+  return {
+    formatted: `${format(parsedDate, "EEEE")}, ${relativeText}`,
+    date: parsedDate,
+  };
+};
+
+const extractBinInfo = (text) => {
+  const labelMatch = text.match(/<b>(.*?)<\/b>/);
+  const dateMatch = text.match(/(\w{3}) (\d{1,2}) (\w{3})/);
+
+  if (labelMatch && dateMatch) {
+    const label = labelMatch[1];
+    const [, day, date, month] = dateMatch;
+    const { formatted, date: parsedDate } = formatRelativeDate(
+      `${day} ${date} ${month}`
+    );
+
+    return { label, formatted, date: parsedDate };
+  }
+  return null;
+};
