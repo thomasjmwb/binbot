@@ -22,4 +22,4 @@ jobs:
         run: npm install
 
       - name: Run the application
-        run: node index.js # Modify this if your entry file is different
+        run: node app.js # Modify this if your entry file is different
