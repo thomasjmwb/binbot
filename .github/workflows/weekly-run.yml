@@ -23,3 +23,9 @@ jobs:
 
       - name: Run the application
         run: node app.js # Modify this if your entry file is different
+        env:
+          MAIL_API_KEY: ${{ secrets.MAIL_API_KEY}}
+          TO_EMAIL: ${{ secrets.TO_EMAIL}}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL}}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN}}
+          DISCORD_NOTIFICATION_CHANNEL_ID: ${{ secrets.DISCORD_NOTIFICATION_CHANNEL_ID}}
