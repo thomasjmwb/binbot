@@ -2,7 +2,7 @@ import FormData from "form-data"; // form-data v4.0.1
 import Mailgun from "mailgun.js"; // mailgun.js v11.1.0
 
 const to = process.env.TO_EMAIL ? JSON.parse(process.env.TO_EMAIL) : [];
-async function sendSimpleMessage(subject, message) {
+export async function sendSimpleMessage(subject, message) {
   const mailgun = new Mailgun(FormData);
   const mg = mailgun.client({
     username: "api",
@@ -20,12 +20,11 @@ async function sendSimpleMessage(subject, message) {
         text: message,
       }
     );
-    console.log("success!");
+    console.log("email success!");
 
     console.log(data); // logs response data
   } catch (error) {
-    console.log("error :(");
+    console.log("email error :(");
     console.log(error); //logs any error
   }
 }
-sendSimpleMessage();

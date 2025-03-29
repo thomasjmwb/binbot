@@ -2,13 +2,13 @@ import { scrapeWebsite } from "./scraper.js";
 import { XMLParser } from "fast-xml-parser";
 import dotenv from "dotenv";
 import { sendAnnouncementToDiscord } from "./discord.js";
+import { sendSimpleMessage } from "./email.js";
 dotenv.config();
 const bangorXml =
   '<?xml version="1.0" encoding="utf-8" ?><soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">     <soap:Body>         <getRoundCalendarForUPRN xmlns="http://webaspx-collections.azurewebsites.net/">             <council>ArdsAndNorthDown</council>             <UPRN>187375731</UPRN>             <from>Chtml</from>         </getRoundCalendarForUPRN>     </soap:Body></soap:Envelope>';
 
 async function main() {
   try {
-    console.log("Starting web scraper...");
     const timestamp = new Date().toISOString();
     console.log(`Scraping started at: ${timestamp}`);
 
@@ -19,6 +19,10 @@ async function main() {
       .map((d) => `${d.label}: ${d.formatted}`)
       .join("\n");
     const fin = await sendAnnouncementToDiscord(notification);
+    const emailResp = await sendSimpleMessage(
+      `${data[0].label} - ${data[0].formatted}`,
+      notification
+    );
     // Log the data to console
     console.log("Scraping completed. Data:");
     console.log(notification);
@@ -65,7 +69,6 @@ async function fetchBins() {
     }
   );
   const text = await resp.text();
-  console.log(text);
 
   const parser = new XMLParser();
   let jObj = parser.parse(text);
